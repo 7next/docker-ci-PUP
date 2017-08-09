@@ -12,4 +12,4 @@ RUN echo y | android-sdk-linux/tools/android --silent update sdk --no-ui --all -
 RUN echo y | android-sdk-linux/tools/android --silent update sdk --no-ui --all --filter extra-google-m2repository
 RUN export ANDROID_HOME=$PWD/android-sdk-linux
 RUN export PATH=$PATH:$PWD/android-sdk-linux/platform-tools/
-RUN chmod +x ./gradlew
+
