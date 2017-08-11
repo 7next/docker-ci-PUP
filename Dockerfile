@@ -17,6 +17,7 @@ ENV PATH=$PATH:$PWD/android-sdk-linux/platform-tools/
 RUN wget --quiet --output-document=android-wait-for-emulator https://raw.githubusercontent.com/travis-ci/travis-cookbooks/0f497eb71291b52a703143c5cd63a217c8766dc9/community-cookbooks/android-sdk/files/default/android-wait-for-emulator
 RUN echo y | android-sdk-linux/tools/android --silent update sdk --no-ui --all --filter sys-img-x86-google_apis-26
 RUN echo no | android-sdk-linux/tools/android create avd -n test -t android-26 --abi google_apis/x86
+RUN chmod +x ./android-wait-for-emulator
 
 
 
