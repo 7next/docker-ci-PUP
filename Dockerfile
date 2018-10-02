@@ -44,10 +44,10 @@ RUN chmod +x /usr/local/bin/assure_emulator_awake.sh
 RUN echo "y" | sdkmanager "tools" "platform-tools" "build-tools;${ANDROID_BUILD_TOOLS}"
 
 # Update SDKs
-RUN echo "y" | sdkmanager "platforms;android-26" "platforms;android-22"
+RUN echo "y" | sdkmanager "platforms;android-22"
 
 # Update emulators
-RUN echo "y" | sdkmanager "system-images;android-22;google_apis;x86_64" "system-images;android-22;google_apis;arm64-v8a"
+RUN echo "y" | sdkmanager "system-images;android-22;google_apis;armeabi-v7a"
 
 # Update extra
 RUN echo "y" | sdkmanager "extras;android;m2repository" "extras;google;m2repository" "extras;google;google_play_services"
