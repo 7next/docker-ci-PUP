@@ -4,7 +4,7 @@
 #
 FROM openjdk:8-jdk
 
-ENV ANDROID_BUILD_TOOLS "26.0.1"
+ENV ANDROID_BUILD_TOOLS "27.0.3"
 ENV ANDROID_SDK_TOOLS "25.2.5"
 ENV ANDROID_HOME "/android-sdk"
 # emulator is in its own path since 25.3.0 (not in sdk tools anymore)
