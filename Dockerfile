@@ -1,31 +1,60 @@
+#
+# GitLab CI Android Runner
+#
+#
 FROM openjdk:8-jdk
 
-RUN apt-get --quiet update --yes
-RUN apt-get --quiet install --yes wget tar unzip lib32stdc++6 lib32z1
-RUN wget --quiet --output-document=android-sdk.tgz https://dl.google.com/android/android-sdk_r24.4.1-linux.tgz
-RUN tar --extract --gzip --file=android-sdk.tgz
-RUN echo y | android-sdk-linux/tools/android --silent update sdk --no-ui --all --filter android-26
-RUN echo y | android-sdk-linux/tools/android --silent update sdk --no-ui --all --filter platform-tools
-RUN echo y | android-sdk-linux/tools/android --silent update sdk --no-ui --all --filter build-tools-26.0.2
-RUN echo y | android-sdk-linux/tools/android --silent update sdk --no-ui --all --filter extra-android-m2repository
-RUN echo y | android-sdk-linux/tools/android --silent update sdk --no-ui --all --filter extra-google-google_play_services
-RUN echo y | android-sdk-linux/tools/android --silent update sdk --no-ui --all --filter extra-google-m2repository
-ENV ANDROID_HOME=$PWD/android-sdk-linux
-ENV PATH=$PATH:$PWD/android-sdk-linux/platform-tools/
+ENV ANDROID_BUILD_TOOLS "26.0.1"
+ENV ANDROID_SDK_TOOLS "25.2.5"
+ENV ANDROID_HOME "/android-sdk"
+# emulator is in its own path since 25.3.0 (not in sdk tools anymore)
+ENV PATH=$PATH:${ANDROID_HOME}/emulator:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools
 
-RUN wget -q --output-document=android-ndk.zip https://dl.google.com/android/repository/android-ndk-r16-linux-x86_64.zip && \
-	unzip android-ndk.zip && \
-	rm -f android-ndk.zip && \
-	mv android-ndk-r16 android-ndk-linux
-ENV ANDROID_NDK=$PWD/android-ndk-linux
-ENV ANDROID_NDK_HOME=$PWD/android-ndk-linux
+# Prepare dependencies
+RUN mkdir $ANDROID_HOME \
+  && apt-get update --yes \
+  && apt-get install --yes wget tar unzip lib32stdc++6 lib32z1 libqt5widgets5 expect \
+  && apt-get clean \
+  && rm -fr /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# Install sdk tools
+RUN wget -O android-sdk.zip https://dl.google.com/android/repository/tools_r${ANDROID_SDK_TOOLS}-linux.zip \
+  && unzip -q android-sdk.zip -d $ANDROID_HOME \
+  && rm android-sdk.zip
 
+# Workaround for 
+# Warning: File /root/.android/repositories.cfg could not be loaded.
+RUN mkdir /root/.android \
+  && touch /root/.android/repositories.cfg
 
-RUN wget --quiet --output-document=android-wait-for-emulator https://raw.githubusercontent.com/travis-ci/travis-cookbooks/0f497eb71291b52a703143c5cd63a217c8766dc9/community-cookbooks/android-sdk/files/default/android-wait-for-emulator
-RUN echo y | android-sdk-linux/tools/android --silent update sdk --no-ui --all --filter sys-img-x86-google_apis-26
-RUN echo no | android-sdk-linux/tools/android create avd -n test -t android-26 --abi google_apis/x86
-RUN chmod +x ./android-wait-for-emulator
+# Workaround for host bitness error with android emulator
+# https://stackoverflow.com/a/37604675/455578
+RUN mv /bin/sh /bin/sh.backup \
+  && cp /bin/bash /bin/sh
 
+# Add tools from travis
+ADD https://raw.githubusercontent.com/travis-ci/travis-cookbooks/ca800a93071a603745a724531c425a41493e70ff/community-cookbooks/android-sdk/files/default/android-wait-for-emulator /usr/local/bin/android-wait-for-emulator
+RUN chmod +x /usr/local/bin/android-wait-for-emulator
 
+# Add own tools
+COPY assure_emulator_awake.sh /usr/local/bin/assure_emulator_awake.sh
+RUN chmod +x /usr/local/bin/assure_emulator_awake.sh
 
+# Update platform and build tools
+RUN echo "y" | sdkmanager "tools" "platform-tools" "build-tools;${ANDROID_BUILD_TOOLS}"
+
+# Update SDKs
+RUN echo "y" | sdkmanager "platforms;android-26" "platforms;android-22"
+
+# Update emulators
+RUN echo "y" | sdkmanager "system-images;android-22;google_apis;x86_64" "system-images;android-22;google_apis;arm64-v8a"
+
+# Update extra
+RUN echo "y" | sdkmanager "extras;android;m2repository" "extras;google;m2repository" "extras;google;google_play_services"
+
+# Constraint Layout
+RUN echo "y" | sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout;1.0.2"
+RUN echo "y" | sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout-solver;1.0.2"
+
+# echo actually installed Android SDK packages
+RUN sdkmanager --list
