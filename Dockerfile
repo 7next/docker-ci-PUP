@@ -7,6 +7,8 @@ FROM openjdk:8-jdk
 ENV ANDROID_BUILD_TOOLS "27.0.3"
 ENV ANDROID_SDK_TOOLS "25.2.5"
 ENV ANDROID_HOME "/android-sdk"
+ENV ANDROID_VERSION "22"
+
 # emulator is in its own path since 25.3.0 (not in sdk tools anymore)
 ENV PATH=$PATH:${ANDROID_HOME}/emulator:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools
 
@@ -44,10 +46,10 @@ RUN chmod +x /usr/local/bin/assure_emulator_awake.sh
 RUN echo "y" | sdkmanager "tools" "platform-tools" "build-tools;${ANDROID_BUILD_TOOLS}"
 
 # Update SDKs
-RUN echo "y" | sdkmanager "platforms;android-22"
+RUN echo "y" | sdkmanager "platforms;android-${ANDROID_VERSION}"
 
 # Update emulators
-RUN echo "y" | sdkmanager "system-images;android-22;google_apis;armeabi-v7a"
+RUN echo "y" | sdkmanager "system-images;android-${ANDROID_VERSION};google_apis;armeabi-v7a" "system-images;android-${ANDROID_VERSION};google_apis;x86"
 
 # Update extra
 RUN echo "y" | sdkmanager "extras;android;m2repository" "extras;google;m2repository" "extras;google;google_play_services"
@@ -56,7 +58,9 @@ RUN echo "y" | sdkmanager "extras;android;m2repository" "extras;google;m2reposit
 RUN echo "y" | sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout;1.0.2"
 RUN echo "y" | sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout-solver;1.0.2"
 
-RUN echo no | avdmanager -v create avd --force --name test --abi google_apis/armeabi-v7a --package "system-images;android-22;google_apis;armeabi-v7a"
+RUN echo no | avdmanager -v create avd --force --name test --abi google_apis/armeabi-v7a --package "system-images;android-${ANDROID_VERSION};google_apis;armeabi-v7a"
+RUN echo no | avdmanager -v create avd --force --name test86 --abi google_apis/armeabi-v7a --package "system-images;android-${ANDROID_VERSION};google_apis;x86"
+
 
 # echo actually installed Android SDK packages
 RUN sdkmanager --list
