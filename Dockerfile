@@ -59,7 +59,7 @@ RUN echo "y" | sdkmanager "extras;m2repository;com;android;support;constraint;co
 RUN echo "y" | sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout-solver;1.0.2"
 
 RUN echo no | avdmanager -v create avd --force --name test --abi google_apis/armeabi-v7a --package "system-images;android-${ANDROID_VERSION};google_apis;armeabi-v7a"
-RUN echo no | avdmanager -v create avd --force --name test86 --abi google_apis/armeabi-v7a --package "system-images;android-${ANDROID_VERSION};google_apis;x86"
+RUN echo no | avdmanager -v create avd --force --name test86 --abi google_apis/x86 --package "system-images;android-${ANDROID_VERSION};google_apis;x86"
 
 
 # echo actually installed Android SDK packages
