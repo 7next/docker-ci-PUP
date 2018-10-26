@@ -61,6 +61,12 @@ RUN echo "y" | sdkmanager "extras;m2repository;com;android;support;constraint;co
 RUN echo no | avdmanager -v create avd --force --name test --abi google_apis/armeabi-v7a --package "system-images;android-${ANDROID_VERSION};google_apis;armeabi-v7a"
 RUN echo no | avdmanager -v create avd --force --name test86 --abi google_apis/x86 --package "system-images;android-${ANDROID_VERSION};google_apis;x86"
 
+RUN wget -q --output-document=android-ndk.zip https://dl.google.com/android/repository/android-ndk-r16-linux-x86_64.zip && \
+ 	unzip android-ndk.zip && \
+ 	rm -f android-ndk.zip && \
+ 	mv android-ndk-r16 android-ndk-linux
+ ENV ANDROID_NDK=$PWD/android-ndk-linux
+ ENV ANDROID_NDK_HOME=$PWD/android-ndk-linux
 
 # echo actually installed Android SDK packages
 RUN sdkmanager --list
