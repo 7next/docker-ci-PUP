@@ -69,8 +69,9 @@ RUN wget -q --output-document=android-ndk.zip https://dl.google.com/android/repo
  ENV ANDROID_NDK_HOME=$PWD/android-ndk-linux
 
 # CMAKE KEEP V6 ONLY
-RUN echo "y" | sdkmanager --uninstall "cmake;3.10.2.4988404"
-RUN echo "y" | sdkmanager "cmake;3.6.4111459"
+# Needed for ToF but the emulator wont start
+# RUN echo "y" | sdkmanager --uninstall "cmake;3.10.2.4988404"
+# RUN echo "y" | sdkmanager "cmake;3.6.4111459"
 
 # echo actually installed Android SDK packages
 RUN sdkmanager --list
